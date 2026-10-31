@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.hibernate.query.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -68,6 +70,11 @@ public class SubmissionController {
         return submissionServ.getBetween(startDate, endDate);
     }
 
+    @GetMapping("/stats/by-status")
+    public List<Object[]> getStatsByStatus() {
+        return submissionServ.getStatsByStatus();
+    }
+
     @PutMapping ("/update/{id}")
     public ResponseEntity<String> update(@PathVariable UUID id, @RequestBody Submission submission) {
         String message = submissionServ.update(id, submission);
@@ -88,6 +95,12 @@ public class SubmissionController {
         } else {
             return new ResponseEntity<>(message, HttpStatus.OK);
         }
+    }
+
+    @PatchMapping ("/cancel-day")
+    public ResponseEntity<String> cancelDay(@RequestParam UUID examinerId, @RequestParam String date) {
+        LocalDate day = LocalDate.parse(date);
+        return new ResponseEntity<>(submissionServ.cancelDay(examinerId, day), HttpStatus.OK);
     }
 
     @DeleteMapping ("/delete/{id}")

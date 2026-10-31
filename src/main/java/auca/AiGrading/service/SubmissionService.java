@@ -5,8 +5,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.Optional;
 
+import org.hibernate.query.Page;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.data.autoconfigure.web.DataWebProperties.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import auca.AiGrading.enums.SubmissionStatus;
 import auca.AiGrading.model.Submission;
@@ -19,6 +22,7 @@ public class SubmissionService {
     @Autowired 
     private SubmissionRepository submissionRepo;
 
+    @Autowired 
     private RubricScoreRepository rubricScoreRepo;
 
     public String save(Submission submission) {
@@ -103,5 +107,15 @@ public class SubmissionService {
 
     public List<Submission> getBetween(LocalDate start, LocalDate end) {
         return submissionRepo.findBySubmittedDateBetweenOrderBySubmittedDateAsc(start, end);
+    }
+
+    public List<Object[]> getStatsByStatus() {
+        return submissionRepo.countByStatus();
+    }
+
+    @Transactional 
+    public String cancelDay(UUID examinerId, LocalDate date) {
+        int count = submissionRepo.cancelDay(examinerId, date, SubmissionStatus.REJECTED, SubmissionStatus.REVIEWED);
+        return count + " submissions cancelled";
     }
 }
